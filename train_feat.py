@@ -111,10 +111,13 @@ if __name__ == '__main__':
         att_label_basis.append(temp)
         
     label = torch.arange(args.way, dtype=torch.int8).repeat(args.query)
+    #label.shape[0] = n_way * n_q uery
     att_label = torch.zeros(label.shape[0], args.way + 1, args.way + 1)
     for i in range(att_label.shape[0]):
-        att_label[i,:] = att_label_basis[label[i].item()]
+        att_label[i,:] = att_label_basis[label[i].item()] #每一项是一个矩阵
     label = label.type(torch.LongTensor)
+
+
     if torch.cuda.is_available():
         label = label.cuda()
         att_label = att_label.cuda()
@@ -125,8 +128,9 @@ if __name__ == '__main__':
         tl = Averager()
         ta = Averager()
             
-        for i, batch in enumerate(train_loader, 1):
+        for i, batch in enumerate(train_loader, 1): #idx start from 1
             global_count = global_count + 1
+            #is batch[1] label ?
             if torch.cuda.is_available():
                 data, _ = [_.cuda() for _ in batch]
             else:
@@ -144,7 +148,7 @@ if __name__ == '__main__':
             total_loss = loss + args.balance * loss_att
             writer.add_scalar('data/total_loss', float(total_loss), global_count)
             print('epoch {}, train {}/{}, total loss={:.4f}, loss={:.4f} acc={:.4f}'
-                  .format(epoch, i, len(train_loader), total_loss.item(), loss.item(), acc))
+                  .format(epoch, i, len(train_loader), total_loss.item(), loss.item(), acc)
             
             tl.add(total_loss.item())
             ta.add(acc)

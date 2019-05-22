@@ -18,7 +18,8 @@ class CategoriesSampler():
 
     def __len__(self):
         return self.n_batch
-    
+
+
     def __iter__(self):
         for i_batch in range(self.n_batch):
             batch = []
@@ -27,6 +28,7 @@ class CategoriesSampler():
                 l = self.m_ind[c]
                 pos = torch.randperm(len(l))[:self.n_per]
                 batch.append(l[pos])
-            batch = torch.stack(batch).t().reshape(-1)
+            batch = torch.stack(batch).t().reshape(-1) #变成一列数据
+            #为什么要转置，本来是class_n * n_per 变成n_per * class_n
             yield batch
 

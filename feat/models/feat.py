@@ -42,7 +42,7 @@ class MultiHeadAttention(nn.Module):
         self.layer_norm = nn.LayerNorm(d_model)
 
         self.fc = nn.Linear(n_head * d_v, d_model)
-        nn.init.xavier_normal_(self.fc.weight)
+        nn.init.xavier_normal_(self.fc.weight)  #为什么用xavier
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, q, k, v):
@@ -92,9 +92,11 @@ class FEAT(nn.Module):
     def forward(self, support, query):
         # feature extraction
         support = self.encoder(support)
-        # get mean of the support
+        # get mean of the support, mean for every class
+        #N = class_num?
+        #proto is prototype
         proto = support.reshape(self.args.shot, -1, support.shape[-1]).mean(dim=0) # N x d
-        num_proto = proto.shape[0]
+        #num_proto = proto.shape[0]
         # for query set
         query = self.encoder(query)
         
@@ -102,7 +104,12 @@ class FEAT(nn.Module):
         num_query = query.shape[0]
         proto = proto.unsqueeze(0).repeat([num_query, 1, 1])  # NK x N x d
         query = query.unsqueeze(1) # NK x 1 x d
+        NK = query.cpu().size()[0]
+        print('look here~~~~~~~~~~~~~~~~~~~~~~~~~~~~------------------->>>>>> '
+              'NK = {}, batch_size = {}'.format(NK,100))
         combined = torch.cat([proto, query], 1) # Nk x (N + 1) x d, batch_size = NK
+        # NK != query size ?????????????????????????????????????????????
+        #其实就是每个query 和 N个proto组成的一个数据
         
         # refine by Transformer
         combined, enc_slf_attn, enc_slf_log_attn = self.slf_attn(combined, combined, combined)

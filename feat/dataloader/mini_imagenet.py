@@ -15,13 +15,14 @@ class MiniImageNet(Dataset):
     """
     def __init__(self, setname, args):
         csv_path = osp.join(SPLIT_PATH, setname + '.csv')
+        #除去第一行
         lines = [x.strip() for x in open(csv_path, 'r').readlines()][1:]
 
-        data = []
-        label = []
-        lb = -1
+        data = []   #data path
+        label = []  #label
+        lb = -1  #label index
 
-        self.wnids = []
+        self.wnids = []  #save class id
 
         for l in lines:
             name, wnid = l.split(',')
